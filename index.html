@@ -43,52 +43,29 @@
     <!-- SLIDES -->
     <slide class="" id="slide-1" style="background:;">
   <hgroup>
-    <h2>What is a Shiny App?</h2>
-  </hgroup>
-  <article data-timings="">
-    <ul>
-<li><p>Shiny is a web application framework for R.</p></li>
-<li><p>It can turn your codes in R into interactive web applications.</p></li>
-<li><p>No HTML, CSS, or JavaScript knowledge are required.</p></li>
-</ul>
-
-  </article>
-  <!-- Presenter Notes -->
-</slide>
-
-<slide class="" id="slide-2" style="background:;">
-  <hgroup>
     <h2>What does my little Shiny App do?</h2>
   </hgroup>
   <article data-timings="">
     <ul>
-<li><p>It simply calculates your body mass index for you.</p></li>
-<li><p>The BMI formula (in standard units):
-\[\mbox{BMI} = \dfrac{\mbox{Weight(lb)}}{\mbox{(Height(in))}^2} \times 703\]</p></li>
-<li><p>My Shiny application can be accessed <a href="https://tianzhixi.shinyapps.io/DataProductsProject">here</a>.</p></li>
+<li>It simply calculates your body mass index for you. It can be accessed <a href="https://tianzhixi.shinyapps.io/DataProductsProject">here</a>.</li>
+<li>The BMI formula (in standard units):
+\[\mbox{BMI} = \dfrac{\mbox{Weight(lb)}}{\mbox{(Height(in))}^2} \times 703\]</li>
 </ul>
 
-  </article>
-  <!-- Presenter Notes -->
-</slide>
+<h2>How does it work?</h2>
 
-<slide class="" id="slide-3" style="background:;">
-  <hgroup>
-    <h2>How does it work?</h2>
-  </hgroup>
-  <article data-timings="">
-    <ol>
-<li><p>Enter your height (inches) and weight (pounds) in the left panel.</p></li>
-<li><p>Press the calculate button.</p></li>
-<li><p>Your BMI will appear on the right panel.</p></li>
-<li><p>If you do not know your height and weight in the standard units, you can use the third and fourth textboxes in the left panel to convert from the metric units to the standard units, the conversion results will appear on the right panel. Just copy the new measurements and follow the previous steps.</p></li>
+<ol>
+<li>Enter your height (inches) and weight (pounds) in the left panel.</li>
+<li>Press the calculate button.</li>
+<li>Your BMI will appear on the right panel.</li>
+<li>If you do not know your height and weight in the standard units, you can use the third and fourth textboxes in the left panel to convert from the metric units to the standard units, the conversion results will appear on the right panel. Just copy the new measurements and follow the previous steps.</li>
 </ol>
 
   </article>
   <!-- Presenter Notes -->
 </slide>
 
-<slide class="" id="slide-4" style="background:;">
+<slide class="" id="slide-2" style="background:;">
   <hgroup>
     <h2>Example R codes.</h2>
   </hgroup>
@@ -108,31 +85,91 @@ BMI
   <!-- Presenter Notes -->
 </slide>
 
+<slide class="" id="slide-3" style="background:;">
+  <hgroup>
+    <h2>ui.R</h2>
+  </hgroup>
+  <article data-timings="">
+    <pre><code>shinyUI(pageWithSidebar(
+  headerPanel(&quot;Body Mass Index Calculator&quot;),
+  sidebarPanel(
+    numericInput(&#39;ht1&#39;, &#39;Please enter your height (inches)&#39;, 0),
+    numericInput(&#39;wt1&#39;, &#39;Please enter your weight (pounds)&#39;, 0),
+    actionButton(&quot;goButton&quot;, &quot;Calculate&quot;),
+    h6(&#39;If you only know metric, enter and use the conversion results on the right.&#39;),
+    numericInput(&#39;ht2&#39;, &#39;Please enter your height (centimeters)&#39;, 0),
+    numericInput(&#39;wt2&#39;, &#39;Please enter your weight (kilograms)&#39;, 0)
+  ),
+  mainPanel(
+    h5(&#39;Converted height (centimeters to inches):&#39;), verbatimTextOutput(&quot;oht2&quot;),
+    h5(&#39;Converted weight (kilograms to pounds):&#39;), verbatimTextOutput(&quot;owt2&quot;),
+    h5(&#39;Your height (inches):&#39;), verbatimTextOutput(&quot;oht1&quot;),
+    h5(&#39;Your weight (pounds):&#39;), verbatimTextOutput(&quot;owt1&quot;),
+    h5(&#39;Your BMI:&#39;), verbatimTextOutput(&quot;prediction&quot;),
+    h5(&#39;BMI Categories:&#39;), h6(&#39;Underweight = &lt;18.5&#39;), h6(&#39;Normal weight = 18.5-24.9&#39;),
+    h6(&#39;Overweight = 25-29.9&#39;), h6(&#39;Obesity = BMI of 30 or greater&#39;)
+  )
+))
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:;">
+  <hgroup>
+    <h2>server.r</h2>
+  </hgroup>
+  <article data-timings="">
+    <pre><code>BMI &lt;- function(ht, wt) {
+  wt/(ht^2)*703
+}
+
+shinyServer(
+  function(input, output) {
+    converted.ht &lt;- reactive({(input$ht2)*0.393701})
+    converted.wt &lt;- reactive({(input$wt2)*2.20462}) 
+    output$oht1 &lt;- renderPrint({input$ht1})
+    output$owt1 &lt;- renderPrint({input$wt1})
+    output$oht2 &lt;- renderPrint({converted.ht()})
+    output$owt2 &lt;- renderPrint({converted.wt()})
+    output$prediction &lt;- renderPrint({
+      if (input$goButton == 0) &quot;You haven&#39;t pressed the calculate button yet.&quot;
+      else round(BMI(input$ht1, input$wt1), digits=2)
+    })
+  }
+)
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
     <slide class="backdrop"></slide>
   </slides>
   <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
     <ul>
       <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=1 title='What is a Shiny App?'>
+        data-slide=1 title='What does my little Shiny App do?'>
          1
       </a>
     </li>
     <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=2 title='What does my little Shiny App do?'>
+        data-slide=2 title='Example R codes.'>
          2
       </a>
     </li>
     <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=3 title='How does it work?'>
+        data-slide=3 title='ui.R'>
          3
       </a>
     </li>
     <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=4 title='Example R codes.'>
+        data-slide=4 title='server.r'>
          4
       </a>
     </li>
